@@ -1,31 +1,24 @@
 import pandas as pd
+from sklearn.metrics.pairwise import cosine_similarity
 
-def get_content_recommendations(anime_title, anime_df, genre_sim_matrix, n=5):
-    """Returns anime with similar genres using Cosine Similarity."""
+def get_content_recommendations(anime_title, anime_df, genre_df, n=5):
+    # ... (Keep this exactly the same as you had it before) ...
     try:
-        # Find index of the target anime
         idx = anime_df[anime_df['name'] == anime_title].index[0]
-        
-        # Calculate similarity scores
-        sim_scores = list(enumerate(genre_sim_matrix[idx]))
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        
-        # Grab top N (skipping index 0, which is the anime itself)
-        top_indices = [i[0] for i in sim_scores[1:n+1]]
-        
-        # Return clean DataFrame
+        target_vector = genre_df.iloc[idx].values.reshape(1, -1)
+        sim_scores = cosine_similarity(target_vector, genre_df)[0]
+        sim_scores_list = sorted(list(enumerate(sim_scores)), key=lambda x: x[1], reverse=True)
+        top_indices = [i[0] for i in sim_scores_list[1:n+1]]
         return anime_df.iloc[top_indices][['name', 'genre', 'rating']].reset_index(drop=True)
     except IndexError:
         return None
 
-def get_collab_recommendations(user_code, model, user_item_matrix, ratings_filtered, anime_df, n=5):
-    """Returns personalized anime using Alternating Least Squares (ALS)."""
+def get_collab_recommendations(user_code, model, user_item_matrix, anime_categories, anime_df, n=5):
     try:
-        # Over-predict to account for ghost IDs dropped during cleaning
         ids, scores = model.recommend(user_code, user_item_matrix[user_code], N=n*4)
         
-        categories = ratings_filtered['anime_category'].cat.categories
-        real_anime_ids = [categories[i] for i in ids if i < len(categories)]
+        # We now use the extracted array directly!
+        real_anime_ids = [anime_categories[i] for i in ids if i < len(anime_categories)]
         
         valid_recs = []
         for original_id in real_anime_ids:
