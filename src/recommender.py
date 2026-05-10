@@ -9,7 +9,8 @@ def get_content_recommendations(anime_title, anime_df, genre_df, n=5):
         sim_scores = cosine_similarity(target_vector, genre_df)[0]
         sim_scores_list = sorted(list(enumerate(sim_scores)), key=lambda x: x[1], reverse=True)
         top_indices = [i[0] for i in sim_scores_list[1:n+1]]
-        return anime_df.iloc[top_indices][['name', 'genre', 'rating']].reset_index(drop=True)
+        # return anime_df.iloc[top_indices][['name', 'genre', 'rating']].reset_index(drop=True)
+        return anime_df.iloc[top_indices][['anime_id', 'name', 'genre', 'rating']].reset_index(drop=True)
     except IndexError:
         return None
 
@@ -24,7 +25,8 @@ def get_collab_recommendations(user_code, model, user_item_matrix, anime_categor
         for original_id in real_anime_ids:
             match = anime_df[anime_df['anime_id'] == original_id]
             if not match.empty:
-                valid_recs.append(match[['name', 'genre', 'rating']].iloc[0])
+                # valid_recs.append(match[['name', 'genre', 'rating']].iloc[0])
+                valid_recs.append(match[['anime_id', 'name', 'genre', 'rating']].iloc[0])
             if len(valid_recs) == n:
                 break
                 
