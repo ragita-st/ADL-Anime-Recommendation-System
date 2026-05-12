@@ -42,14 +42,24 @@ def display_recommendation_cards(recommendations_df):
         
         with img_col:
             if img_url:
-                # st.image(img_url, use_container_width=True)
                 st.image(img_url, width='stretch')
             else:
-                st.write("🖼️ Image missing")
+                # 1. MISSING IMAGE PLACEHOLDER
+                st.image("https://via.placeholder.com/225x320/1E2130/7B61FF.png?text=No+Poster", width='stretch')
                 
         with text_col:
-            st.markdown(f"#### {row['name']}")
-            st.caption(f"⭐ **{row['rating']} / 10** |  🏷️ **{row['genre']}**")
+            st.markdown(f"### {row['name']}")
+            
+            # 2. METRIC CARD (Makes the rating pop out visually)
+            st.metric(label="Community Score", value=f"⭐ {row['rating']}")
+            
+            # 3. HTML GENRE PILLS (Creates rounded, colored tags)
+            genre_html = ""
+            for g in str(row['genre']).split(', '):
+                genre_html += f"<span style='background-color:#7B61FF; color:white; padding:4px 10px; border-radius:15px; font-size:12px; margin-right:5px; display:inline-block; margin-bottom:5px;'>{g}</span>"
+            st.markdown(genre_html, unsafe_allow_html=True)
+            
+            st.write("") # Add a tiny bit of spacing
             
             # Truncate the synopsis so it doesn't make the page too long
             short_synopsis = synopsis[:250] + "..." if len(synopsis) > 250 else synopsis
